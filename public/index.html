@@ -1,0 +1,55 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meeting AI</title>
+  <style>
+    body { max-width: 900px; margin: 40px auto; font-family: system-ui, sans-serif; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+    textarea { width: 100%; min-height: 180px; padding: 10px; }
+    pre { background: #fafafa; padding: 10px; border-radius: 8px; overflow-x: auto; }
+    button { padding: 8px 14px; border-radius: 8px; border: 1px solid #999; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Meeting AI</h1>
+  <div class="card">
+    <h3>Summarize transcript (paste text or upload .txt)</h3>
+    <textarea id="txt" placeholder="Paste transcript here..."></textarea>
+    <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
+      <input type="file" id="file" accept=".txt" />
+      <button id="summarize">Summarize</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Result (JSON)</h3>
+    <pre id="out"></pre>
+  </div>
+  <script>
+    const btn = document.getElementById('summarize');
+    const out = document.getElementById('out');
+    btn.onclick = async () => {
+      out.textContent = 'Thinking...';
+      const f = document.getElementById('file').files[0];
+      if (f) {
+        const fd = new FormData();
+        fd.append('transcript', f);
+        const r = await fetch('/api/summarize', { method: 'POST', body: fd });
+        const j = await r.json();
+        out.textContent = JSON.stringify(j, null, 2);
+      } else {
+        const text = document.getElementById('txt').value;
+        const r = await fetch('/api/summarize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        const j = await r.json();
+        out.textContent = JSON.stringify(j, null, 2);
+      }
+    };
+  </script>
+</body>
+</html>
